@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Package Input</title>
+    <style>
+        .input-container {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Select Package ID</h1>
+
+    <div class="input-container">
+        <label for="packageIdSelect">Package ID:</label>
+        <select id="packageIdSelect" name="packageIdSelect">
+            <option value="">Select a Package ID</option>
+            <option value="1">Package ID 1</option>
+            <option value="2">Package ID 2</option>
+            <option value="10">Package ID 10</option>
+        </select>
+    </div>
+
+    <button onclick="fetchPackageData()">Get Package Details</button>
+
+    <h2>Results</h2>
+    <div id="results"></div>
+
+
+    <script>
+        async function fetchPackageData() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';  // Clear previous results
+
+            const packageId = document.getElementById('packageIdSelect').value;
+
+            if (packageId) { // Only fetch if packageId has value
+                try {
+                    // Changed the port from 5000 to 5001
+                    const response = await fetch(`http://127.0.0.1:5001/packages/${packageId}`);
+                    if (!response.ok) {
+                      const errorData = await response.json()
+                      resultsDiv.innerHTML += `<p style="color:red">Error for Package ID ${packageId}: ${errorData.message}</p>`;
+                      return;
+                    }
+
+                  const data = await response.json();
+                  resultsDiv.innerHTML += `<p>Package ID ${packageId}:</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+                } catch (error) {
+                    resultsDiv.innerHTML += `<p style="color:red">Error: ${error.message}</p>`;
+                }
+              } else {
+                  resultsDiv.innerHTML += `<p>Please select a Package ID</p>`
+              }
+          }
+    </script>
+
+</body>
+</html>
