@@ -1,151 +1,197 @@
 openapi: 3.0.0
 info:
   title: Package Management API
-  description: An API for managing packages.
+  description: >-
+    This API allows for managing packages. It provides endpoints for creating,
+    retrieving, updating, and deleting package information.
   version: 1.0.0
+  contact:
+    name: Cymbal Logistics
+    url: cymballogistics.com
 paths:
   /packages:
     get:
-      description: List all packages.
-      operationId: getPackages
+      description: >-
+        Retrieve a list of all packages. This operation returns a paginated list
+        of packages.
+      parameters:
+        - description: The number of items to return per API request.
+          in: query
+          name: pageSize
+          schema:
+            type: integer
+        - description: >-
+            A page token received from a previous API request, used to request a
+            subsequent page.
+          in: query
+          name: pageToken
+          schema:
+            type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Package'
-          description: OK
-        '400':
+                properties:
+                  data:
+                    items:
+                      $ref: '#/components/schemas/package'
+                    type: array
+                  nextPageToken:
+                    type: string
+                type: object
+          description: A paginated list of packages
+        default:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad Request
+                $ref: '#/components/schemas/error'
+          description: Unexpected error
       tags:
         - packages
     post:
-      description: Creates a new package.
+      description: Create a new package.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Package'
+              $ref: '#/components/schemas/package'
+        description: Package details to create.
+        required: true
       responses:
         '201':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Package'
+                $ref: '#/components/schemas/package'
           description: Package created successfully.
         '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request.
+                $ref: '#/components/schemas/error'
+          description: Invalid input
         '500':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-          description: Internal server error.
-      summary: Create a new package.
+                $ref: '#/components/schemas/error'
+          description: Internal Server Error
       tags:
         - packages
   /packages/{packageId}:
     delete:
-      description: Delete a specific package.
+      description: Delete a specific package by its ID.
       operationId: deletePackage
       responses:
-        '200':
-          description: OK
+        '204':
+          description: Package deleted successfully
         '404':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-          description: Not Found
+                $ref: '#/components/schemas/error'
+          description: Package not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Internal server error
       tags:
         - packages
     get:
-      description: Get the details of a specific package.
-      operationId: getPackage
+      description: Retrieve a specific package by its ID.
+      operationId: getPackageById
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Package'
-          description: OK
+                $ref: '#/components/schemas/package'
+          description: Successful operation
         '404':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-          description: Not Found
+                $ref: '#/components/schemas/error'
+          description: Package not found
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Internal Server Error
       tags:
         - packages
     parameters:
-      - description: The unique identifier of the package.
+      - description: ID of the package to delete
         in: path
         name: packageId
         required: true
         schema:
-          type: string
+          format: int64
+          type: integer
     put:
-      description: Update the details of a specific package.
-      operationId: updatePackage
+      description: Update a specific package by its ID.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Package'
+              $ref: '#/components/schemas/package'
+        description: Package object that needs to be updated
+        required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Package'
-          description: OK
+                $ref: '#/components/schemas/package'
+          description: Successful operation
         '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad Request
+                $ref: '#/components/schemas/error'
+          description: Invalid input
         '404':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-          description: Not Found
+                $ref: '#/components/schemas/error'
+          description: Package not found
       tags:
         - packages
 components:
   schemas:
-    Error:
-      description: An error response.
+    error:
+      description: Error object
       properties:
         code:
-          description: The error code.
+          description: The error code
           type: string
         message:
-          description: The error message.
+          description: The error message
           type: string
-    Package:
       type: object
+    package:
       properties:
-        height:
-          type: integer
-          format: int64
-        width:
-          type: integer
-          format: int64
         depth:
-          type: integer
+          description: Depth of the package.
           format: int64
-        weight:
           type: integer
+        height:
+          description: Height of the package.
           format: int64
+          type: integer
         special_handling_instructions:
           type: string
+        weight:
+          description: Weight of the package.
+          format: int64
+          type: integer
+        width:
+          description: Width of the package.
+          format: int64
+          type: integer
+      type: object
